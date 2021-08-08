@@ -13,7 +13,7 @@ contract LemonadeStand {
         uint price;
         State state;
         address payable seller;
-        address buyer;
+        address payable buyer;
     }
 
     mapping(uint => Item) items;
@@ -50,6 +50,15 @@ contract LemonadeStand {
         _;
     }            
 
+    modifier checkValue(uint _sku) {
+        _;
+        uint _price = items[_sku].price;
+        uint amountToRefund = msg.value - _price;
+
+        address payable buyerPayableAddress = items[_sku].buyer;
+        buyerPayableAddress.transfer(amountToRefund);
+    }
+
     constructor()  public {
         owner = msg.sender;
         skuCount = 0;
@@ -64,7 +73,7 @@ contract LemonadeStand {
     }
 
     function buyItem(uint sku) public payable forSale(sku) paidEnough(items[sku].price) {
-        address buyer = msg.sender;
+        address payable buyer = msg.sender;
         uint price = items[sku].price;
 
         items[sku].buyer = buyer;
